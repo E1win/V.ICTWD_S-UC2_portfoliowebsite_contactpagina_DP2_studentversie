@@ -20,6 +20,7 @@ namespace Portfoliowebsite.Services
 
             mail.Subject = $"Contact: {Subject}";
             mail.Body = $"Naam: {Name}\nEmail: {Email}\nBericht:\n{Message}";
+            mail.IsBodyHtml = false;
 
             await smtp.SendMailAsync(mail);
         }
