@@ -46,8 +46,3 @@ input, textarea {
     font-size: .9rem;
     color: #a94442;
 }
-
-#liveStatus {
-    position: absolute;
-    left: -9999px;
-}

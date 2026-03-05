@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Portfoliowebsite.Models;
 using Portfoliowebsite.Services;
 
 namespace Portfoliowebsite.Controllers
@@ -9,17 +10,34 @@ namespace Portfoliowebsite.Controllers
         private readonly IEmailSender _email;
         public ContactController(IEmailSender email) => _email = email;
 
-        public IActionResult Index() => View();
+        public IActionResult Index() => View(new ContactModel());
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(string Name, string Email, string Subject, string Message)
+        public async Task<IActionResult> ContactRequest(ContactModel model, CancellationToken ct)
         {
-            await _email.SendAsync(Name, Email, Subject, Message);
+            // Honeypot check
+            if (!string.IsNullOrEmpty(model.Website))
+            {
+                return BadRequest("Ongeldige aanvraag");
+            }
 
-            TempData["ThanksName"] = Name;
-            TempData["ThanksEmail"] = Email;
-            TempData["ThanksMessage"] = Message;
+            if (!ModelState.IsValid)
+                return View("Index", model);
+
+            try
+            {
+                await _email.SendAsync(model.Name, model.Email, model.Subject, model.Message);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(string.Empty, "Er ging iets mis bij het versturen. Probeer het later opnieuw.");
+                return View("Index", model);
+            }
+
+            TempData["ThanksName"] = model.Name;
+            TempData["ThanksEmail"] = model.Email;
+            TempData["ThanksMessage"] = model.Message;
 
             return RedirectToAction(nameof(Thanks));
         }
