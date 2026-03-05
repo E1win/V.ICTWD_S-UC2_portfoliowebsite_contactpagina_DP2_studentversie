@@ -12,6 +12,7 @@ namespace Portfoliowebsite.Controllers
         public IActionResult Index() => View();
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(string Name, string Email, string Subject, string Message)
         {
             await _email.SendAsync(Name, Email, Subject, Message);
