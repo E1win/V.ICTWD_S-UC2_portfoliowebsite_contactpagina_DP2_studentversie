@@ -7,10 +7,15 @@ namespace Portfoliowebsite.Controllers
     public class ContactController : Controller
     {
 
+        const int MINIMUM_COMPLETION_SECONDS = 2;
         private readonly IEmailSender _email;
         public ContactController(IEmailSender email) => _email = email;
 
-        public IActionResult Index() => View(new ContactModel());
+        public IActionResult Index()
+        {
+            HttpContext.Session.SetString("ContactFormStart", DateTime.UtcNow.Ticks.ToString());
+            return View(new ContactModel());
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -24,6 +29,11 @@ namespace Portfoliowebsite.Controllers
 
             if (!ModelState.IsValid)
                 return View("Index", model);
+
+            if (!FormSubmittedInNormalTime())
+            {
+                return BadRequest("Inzending tegengehouden door spampreventie");
+            }
 
             try
             {
@@ -45,6 +55,24 @@ namespace Portfoliowebsite.Controllers
         public IActionResult Thanks()
         {
             return View();
+        }
+
+        private bool FormSubmittedInNormalTime()
+        {
+            var ticks = HttpContext.Session.GetString("ContactFormStart");
+
+            if (ticks != null)
+            {
+                var start = new DateTime(long.Parse(ticks), DateTimeKind.Utc);
+                var elapsed = DateTime.UtcNow - start;
+
+                if (elapsed.TotalSeconds < MINIMUM_COMPLETION_SECONDS)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
