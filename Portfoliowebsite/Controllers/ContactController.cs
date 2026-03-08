@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Portfoliowebsite.Models;
 using Portfoliowebsite.Services;
 
@@ -18,6 +19,7 @@ namespace Portfoliowebsite.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting("ContactFormPostPolicy")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ContactRequest(ContactModel model, CancellationToken ct)
         {
