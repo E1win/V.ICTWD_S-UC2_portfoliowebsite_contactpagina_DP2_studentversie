@@ -34,7 +34,7 @@ namespace Portfoliowebsite.Services
 
             mail.Subject = $"Contact: {Subject}";
             mail.Body = $"Naam: {Name}\nEmail: {Email}\nBericht:\n{Message}";
-            mail.IsBodyHtml = false;
+            mail.IsBodyHtml = false; // Make sure body is in HTML, to avoid XSS
 
             await smtp.SendMailAsync(mail);
         }
